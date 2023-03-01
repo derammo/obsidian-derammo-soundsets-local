@@ -1,0 +1,15 @@
+img + span.cm-inline-code > span.derammo-auto-dim {
+    color: var(--text-faint);
+}
+
+img + span.cm-inline-code > span.derammo-auto-hide {
+    display: none;
+}
+
+.derammo-button:hover {
+    cursor: pointer;
+}
+
+.derammo-localplayer-button {
+    margin: 0.25em;
+}
