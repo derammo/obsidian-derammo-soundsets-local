@@ -1,13 +1,12 @@
 import { WidgetType } from "@codemirror/view";
-import { CommandWidgetBase, Decoration, EditorView, ParsedCommand, ParsedCommandWithParameters, SyntaxNodeRef } from "derobst/command";
+import { CommandWidgetBase, EditorView, ParsedCommand } from "derobst/command";
 import { WidgetContext } from "derobst/interfaces";
-import { ViewPluginContext } from "derobst/view";
 import { PluginServices } from "main/PluginServices";
 
 import * as fs from "node:fs";
 import * as tmp from "tmp";
 
-const FANTASY_REGEX = /^\s*!syrinscape-fantasy(?:\s(.*))?$/;
+export const FANTASY_REGEX = /^\s*!syrinscape-fantasy(?:\s(.*))?$/;
 
 export class LocalPlayerWidget extends CommandWidgetBase<PluginServices> {
 	constructor(context: WidgetContext<PluginServices>, command: ParsedCommand<PluginServices>, protected name: string | undefined, protected uri: string, protected resource: string) {
@@ -66,9 +65,9 @@ export class LocalPlayerWidget extends CommandWidgetBase<PluginServices> {
 				button.innerText = info.name;
 			} else {
 				// no sound info, just name it something default
-				const parseName = this.resource.match(/\/([^/]+)\/$/);
+				const parseName = this.resource.match(/(?:\/|^)([^/]+)\/$/);
 				if (parseName !== null) {
-					button.innerText = parseName[1];
+					button.innerText = parseName[1].replace("-", " ");
 				} else {
 					button.innerText = 'play';
 				}
@@ -77,7 +76,16 @@ export class LocalPlayerWidget extends CommandWidgetBase<PluginServices> {
 	}
 
 	locateCommandFolder(): Promise<string | null> {
-		const guess = `${process.env.HOME}/Library/Application Support/com.syrinscape.SyrinscapeFantasyPlayer/URI`;
+		return this.checkPath(`${process.env.HOME}/Library/Application Support/com.syrinscape.SyrinscapeFantasyPlayer/URI`)
+			.then((guess: string | null) => {
+				if (guess !== null) {
+					return guess;
+				}
+				return this.checkPath(`${process.env.LOCALAPPDATA}Low/Syrinscape/Syrinscape Fantasy Player/URI`);
+			});
+	}
+
+	private checkPath(guess: string): Promise<string | null> {
 		return fs.promises.stat(guess)
 			.then((stats: fs.Stats) => {
 				if (stats.isDirectory()) {
@@ -85,10 +93,9 @@ export class LocalPlayerWidget extends CommandWidgetBase<PluginServices> {
 				}
 				return null;
 			})
-		.catch((err: Error) => {
-			console.debug(`Could not find local player folder at ${guess}: ${err.message}`);
-			return null;
-		});
+			.catch((_err: Error) => {
+				return null;
+			});
 	}
 
 	eq(widget: WidgetType): boolean {
@@ -103,31 +110,3 @@ export class LocalPlayerWidget extends CommandWidgetBase<PluginServices> {
 	}
 }
 
-export class FantasyCommand extends ParsedCommandWithParameters<PluginServices> {
-	constructor() {
-		super();
-	}
-
-	get protocol(): string {
-		return "syrinscape-fantasy";
-	}
-
-	buildWidget(context: ViewPluginContext<PluginServices>, commandNodeRef: SyntaxNodeRef): void {
-		// reconstitute the URI we represent, so we can look up sound info
-		const uri = `${this.protocol}:${this.parameters.cmd}`;
-		let configuredName: string | undefined;
-		if (typeof this.parameters.name == "string") {
-			configuredName = this.parameters.name;
-		}
-		context.builder.add(commandNodeRef.from-1, commandNodeRef.from-1, Decoration.widget({ widget: new LocalPlayerWidget(context, this, configuredName, uri, `${this.parameters.cmd}`) }));
-		context.builder.add(commandNodeRef.from, commandNodeRef.to, Decoration.mark({ attributes: { "class": "derammo-auto-hide" } }));
-	}
-
-	get regex(): RegExp {
-		return FANTASY_REGEX;
-	}
-
-	static match(text: string): boolean {
-		return text.match(FANTASY_REGEX) !== null;
-	}
-}

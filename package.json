@@ -18,7 +18,8 @@
 		"dropboxinit": "run-script-os",
 		"dropboxinit:windows": "powershell -Command \"& {Set-Content -Path .\\node_modules -Stream com.dropbox.ignored -Value 1}\"",
 		"dropboxinit:darwin": "xattr -w com.dropbox.ignored 1 ./node_modules",
-		"dropboxinit:linux": "attr -s com.dropbox.ignored -V 1 ./node_modules"
+		"dropboxinit:linux": "attr -s com.dropbox.ignored -V 1 ./node_modules",
+		"hotreload": "cd .. && git clone https://github.com/pjeby/hot-reload"
 	},
 	"keywords": [],
 	"author": "derammo",

@@ -4,7 +4,7 @@ import { PluginServices, SoundInfo } from "main/PluginServices";
 
 import { Settings, DEFAULT_SETTINGS, SettingTab } from "main/Settings";
 import { TFile } from "obsidian";
-import { FantasyCommand } from "./src/main/LocalPlayerCommand";
+import { FantasyCommand } from "./src/main/FantasyCommand";
 
 import * as fs from "node:fs";
 import { parse} from "csv-parse";
@@ -45,6 +45,7 @@ export default class ObsidianPlugin extends ObsidianPluginBase<Settings> impleme
 			})
 			.on("end", () => {
 				// invalidate all view decorations
+				console.debug(`loaded sound definitions from ${file.path}`);
 				this.app.workspace.updateOptions();
 			});
 	}
