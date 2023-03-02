@@ -3,7 +3,7 @@ import { ObsidianPluginBase } from "derobst/main";
 import { PluginServices, SoundInfo } from "main/PluginServices";
 
 import { Settings, DEFAULT_SETTINGS, SettingTab } from "main/Settings";
-import { TFile } from "obsidian";
+import { Editor, MarkdownFileInfo, MarkdownView, TFile } from "obsidian";
 import { FantasyCommand } from "./src/main/FantasyCommand";
 
 import * as fs from "node:fs";
@@ -31,6 +31,29 @@ export default class ObsidianPlugin extends ObsidianPluginBase<Settings> impleme
 			}
 			this.createIndex(file);
 		});
+		this.app.workspace.on("editor-paste", this.paste.bind(this))
+	}
+
+	paste(evt: ClipboardEvent, editor: Editor, _info: MarkdownView | MarkdownFileInfo): void {
+		if (evt.defaultPrevented) {
+			return;
+		}
+		const text = evt.clipboardData?.getData("text/plain");
+		if (text === undefined) {
+			return;
+		}
+		if (text.startsWith("syrinscape-fantasy:")) {
+			evt.stopPropagation();
+			evt.preventDefault();
+			if (evt.defaultPrevented) {
+				const info = this.fetchSoundInfo(text);
+				let nameDefine = "";
+				if (info !== null) {
+					nameDefine = ` name="${info.name}"`;
+				}
+				editor.replaceSelection(`\`${text.replace("syrinscape-fantasy:", "!syrinscape-fantasy cmd=")}${nameDefine}\``);
+			}
+		}
 	}
 
 	// this async streams in a lot of records
