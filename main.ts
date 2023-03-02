@@ -18,6 +18,7 @@ export default class ObsidianPlugin extends ObsidianPluginBase<Settings> impleme
 		this.registerTextRangeTracker();
 		this.commands.registerCommand(FantasyCommand);
 		this.registerViewPlugin(createCommandsPlugin(this));
+		this.registerMarkdownPostProcessor(this.commands.createRemovalPostProcessor());
 		this.addSettingTab(new SettingTab(this.app, this, this));
 		this.app.vault.on("create", (file) => {
 			if (!(file instanceof TFile)) {
