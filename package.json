@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-derammo-soundsets-local",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "derammo-soundsets-local plugin for Obsidian.",
 	"main": "main.js",
 	"types": "main.d.ts",

@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-derammo-soundsets-local",
 	"name": "Sound Sets (Local)",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"minAppVersion": "0.15.0",
 	"description": "Converts Syrinscape URIs to buttons for playback using local (not online) player on MacOS.",
 	"author": "derammo",
